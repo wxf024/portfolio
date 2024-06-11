@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投资分配计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        label, textarea, input {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        input[type="submit"] {
+            width: auto;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>王大喵的投资组合计算器</h1>
+    <form id="investment-form">
+        <label for="betas">请输入每只股票的名称和 beta 值（每行一组，格式：股票名称 beta值）:</label>
+        <textarea id="betas" name="betas" rows="10" required></textarea>
+        <label for="total_investment">请输入总投资金额:</label>
+        <input type="number" id="total_investment" name="total_investment" required>
+        <input type="submit" value="计算">
+    </form>
+    <h2>计算结果:</h2>
+    <pre id="result"></pre>
+
+    <script>
+        document.getElementById('investment-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let lines = document.getElementById('betas').value.trim().split('\n');
+            let totalInvestment = parseFloat(document.getElementById('total_investment').value);
+
+            let betas = [];
+            let stockNames = [];
+            for (let line of lines) {
+                let [stockName, beta] = line.split(' ');
+                stockNames.push(stockName);
+                betas.push(parseFloat(beta));
+            }
+
+            if (betas.some(isNaN) || isNaN(totalInvestment)) {
+                document.getElementById('result').textContent = '请输入有效的数字';
+                return;
+            }
+
+            let reciprocals = betas.map(beta => 1 / beta);
+            let totalReciprocal = reciprocals.reduce((a, b) => a + b, 0);
+            let investmentRatios = reciprocals.map(reciprocal => reciprocal / totalReciprocal);
+            let investments = investmentRatios.map(ratio => ratio * totalInvestment);
+
+            let result = investments.map((amount, index) => `${stockNames[index]} 的投资金额: ${amount.toFixed(2)}`).join('\n');
+            document.getElementById('result').textContent = result;
+        });
+    </script>
+</body>
+</html>
